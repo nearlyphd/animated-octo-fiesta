@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# IDE configuration
+.idea/
+
+# Data folder
+data/
+
+# Models
+*.pt
+*.pth
