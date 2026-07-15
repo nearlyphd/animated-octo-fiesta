@@ -48,6 +48,9 @@ RUN pip install pingouin
 # Copy X-ray images into the container
 COPY data/hto/xrays/ /tf/data/hto/xrays/
 
+# Copy HTO utils library
+COPY notebooks/hto/ /tf/notebooks/hto/
+
 # Expose ports
 EXPOSE 8888
 EXPOSE 22
