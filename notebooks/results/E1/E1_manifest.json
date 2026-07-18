@@ -1,0 +1,83 @@
+{
+  "experiment": "Paper A / E1 - landmark importance and precision budget",
+  "annotations": "/tf/data/hto/xrays/hto_annotations.json",
+  "predictions": "out-of-fold U-Net, best_model_fold[1-5].pt",
+  "n_hemispheres": 107,
+  "n_radiographs": 54,
+  "seed": 42,
+  "target_size": 768,
+  "heatmap_scale": 0.5,
+  "tolerance_deg": 1.63,
+  "z_budget": 1.0,
+  "side_keys": [
+    "femur_head",
+    "knee_inner",
+    "ost_point",
+    "knee_outer",
+    "ankle_inner",
+    "ankle_outer"
+  ],
+  "pixel_spacing_mm": null,
+  "alpha_deg": {
+    "mean": 6.916790531226925,
+    "median": 6.440773389490723,
+    "min": 0.4566892793750851,
+    "max": 24.81975012622058
+  },
+  "importance_median_deg_per_px": {
+    "femur_head": 0.019432377471192055,
+    "knee_inner": 0.016158439404495493,
+    "ost_point": 0.002539246849239583,
+    "knee_outer": 0.026930732340825825,
+    "ankle_inner": 0.011423684948319315,
+    "ankle_outer": 0.011423684948319315
+  },
+  "importance_ratio_vs_least": {
+    "femur_head": 7.122380059380839,
+    "knee_inner": 6.002836566270642,
+    "ost_point": 1.0,
+    "knee_outer": 10.00472761045107,
+    "ankle_inner": 4.362819461452822,
+    "ankle_outer": 4.362819461452822
+  },
+  "least_influential": "ost_point",
+  "budget_px_typical": {
+    "femur_head": 34.24412244166209,
+    "knee_inner": 41.18248655070991,
+    "ost_point": 262.0638137861132,
+    "knee_outer": 24.709491930425948,
+    "ankle_inner": 58.25131877030615,
+    "ankle_outer": 58.25131877030615
+  },
+  "risk_mean_deg": {
+    "femur_head": 0.3634092675036701,
+    "knee_inner": 0.23194571823743676,
+    "ost_point": 0.05459192812943307,
+    "knee_outer": 0.4266605039232629,
+    "ankle_inner": 0.16727623905477965,
+    "ankle_outer": 0.21289407865569776
+  },
+  "angle_error_deg": {
+    "mean": 0.45175181462107117,
+    "median": 0.3482483198345019,
+    "max": 1.7463331466174106,
+    "within_tolerance": 0.9906542056074766
+  },
+  "delta_method_r2": 0.9999450863638348,
+  "delta_method_mae_deg": 0.002614569520548766,
+  "verification": {
+    "max_parity": 3.552713678800501e-15,
+    "max_grad": 6.764545673657175e-09,
+    "max_linear": 0.0002773153625620778,
+    "max_symmetry": 0.0,
+    "n_checked": 107,
+    "n_finite_difference": 107,
+    "channel_order_checked": true,
+    "alpha_deg": {
+      "mean": 6.916790531226924,
+      "min": 0.4566892793750851,
+      "max": 24.81975012622058
+    }
+  },
+  "torch": "2.5.1+cu121"
+}
