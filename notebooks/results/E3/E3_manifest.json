@@ -1,0 +1,84 @@
+{
+  "experiment": "Paper A / E3 - synthetic perturbation, first-order validity",
+  "cohort_source": "E1 cache (E1_cohort.npz)",
+  "n_hemispheres": 107,
+  "seed": 42,
+  "tolerance_deg": 1.63,
+  "z_budget": 1.0,
+  "n_evaluations": 677952,
+  "radii_px": [
+    1.0,
+    400.0
+  ],
+  "n_directions": 48,
+  "linear_target_at_budget_deg": 0.6654447134560967,
+  "validity_range_px": {
+    "femur_head": {
+      "r_safe_0.10": 169.95624819678739,
+      "r_safe_0.50": 300.7131172822503,
+      "obs_err_rms": 22.25884568851341,
+      "budget_px": 34.24412244166209
+    },
+    "knee_inner": {
+      "r_safe_0.10": 226.07094726402102,
+      "r_safe_0.50": 400.0,
+      "obs_err_rms": 17.154316283480053,
+      "budget_px": 41.18248655070991
+    },
+    "ost_point": {
+      "r_safe_0.10": 169.95624819678739,
+      "r_safe_0.50": 400.0,
+      "obs_err_rms": 22.96645618368638,
+      "budget_px": 262.0638137861132
+    },
+    "knee_outer": {
+      "r_safe_0.10": 169.95624819678739,
+      "r_safe_0.50": 300.7131172822503,
+      "obs_err_rms": 18.74135185771273,
+      "budget_px": 24.709491930425948
+    },
+    "ankle_inner": {
+      "r_safe_0.10": 226.07094726402102,
+      "r_safe_0.50": 400.0,
+      "obs_err_rms": 16.938325692968505,
+      "budget_px": 58.25131877030615
+    },
+    "ankle_outer": {
+      "r_safe_0.10": 226.07094726402102,
+      "r_safe_0.50": 400.0,
+      "obs_err_rms": 22.302612415246458,
+      "budget_px": 58.25131877030615
+    }
+  },
+  "budget_error_deg": {
+    "femur_head": 0.000398930157402444,
+    "knee_inner": 0.0004201939028548596,
+    "ost_point": 0.0699023355987124,
+    "knee_outer": 0.0004201939028548596,
+    "ankle_inner": 0.0004130751496375096,
+    "ankle_outer": 0.0004130751496375096
+  },
+  "monte_carlo_sd_ratio": {
+    "0.5": 1.0000948483182905,
+    "1.0": 0.9975814636824164,
+    "2.0": 0.9998720038102816,
+    "4.0": 0.9988008351263367,
+    "8.0": 1.0009461098278263
+  },
+  "scaling_slope_mean": 2.0000127068042093,
+  "verification": {
+    "max_parity": 3.552713678800501e-15,
+    "max_grad": 6.764545673657175e-09,
+    "max_linear": 0.0002773153625620778,
+    "max_symmetry": 0.0,
+    "max_batched": 1.7763568394002505e-15,
+    "n_checked": 107,
+    "n_finite_difference": 107,
+    "channel_order_checked": true,
+    "alpha_deg": {
+      "mean": 6.916790531226924,
+      "min": 0.4566892793750851,
+      "max": 24.81975012622058
+    }
+  }
+}

@@ -87,8 +87,8 @@ DEFAULT_DTYPE = torch.float64
 
 __all__ = [
     "SIDE_KEYS", "HEMISPHERE_BASES", "LANDMARK_LABELS", "FUJISAWA_PCT", "TOLERANCE_DEG",
-    "points_to_tensor", "miniaci_angle_signed", "angle_and_jacobian",
-    "cohort_jacobians", "delta_method", "precision_budget",
+    "points_to_tensor", "miniaci_angle_signed", "batched_angle_signed", "wrap_deg",
+    "angle_and_jacobian", "cohort_jacobians", "delta_method", "precision_budget",
 ]
 
 
@@ -140,6 +140,59 @@ def miniaci_angle_signed(P, fujisawa_pct=FUJISAWA_PCT):
     diff = torch.atan2(v_orig[1], v_orig[0]) - torch.atan2(v_target[1], v_target[0])
     wrapped = torch.atan2(torch.sin(diff), torch.cos(diff))      # -> (-pi, pi], smooth
     return wrapped * (180.0 / math.pi)
+
+
+def batched_angle_signed(P, fujisawa_pct=FUJISAWA_PCT):
+    """Vectorised, NumPy-only version of :func:`miniaci_angle_signed`.
+
+    :func:`miniaci_angle_signed` differentiates one hemisphere at a time; a large
+    perturbation study (E3, Monte-Carlo in Papers B/D) needs the *exact* angle for
+    millions of configurations at once, where autodiff is not required. This computes the
+    identical quantity over an arbitrary batch. It carries no gradient -- pair it with
+    :func:`angle_and_jacobian` for J, which is evaluated once per hemisphere at the
+    unperturbed landmarks.
+
+    The formula is line-for-line the same as :func:`miniaci_angle_signed`;
+    :func:`hto.sensitivity.validation.check_batched` asserts parity against it so the two
+    cannot drift.
+
+    Parameters
+    ----------
+    P : numpy.ndarray
+        ``(..., 6, 2)`` landmarks in :data:`SIDE_KEYS` order, any leading batch shape.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``(...)`` signed correction angle in degrees.
+    """
+    P = np.asarray(P, dtype=float)
+    fh, ki, ost, ko, ai, ao = (P[..., i, :] for i in range(6))
+
+    ankle_c = (ai + ao) / 2.0
+    fujisawa = ki + fujisawa_pct * (ko - ki)
+
+    d = fujisawa - fh
+    tx = fh[..., 0] + d[..., 0] * (ankle_c[..., 1] - fh[..., 1]) / d[..., 1]
+    target_at_ankle = np.stack([tx, ankle_c[..., 1]], axis=-1)
+
+    v_orig = ankle_c - ost
+    v_target = target_at_ankle - ost
+    diff = (np.arctan2(v_orig[..., 1], v_orig[..., 0])
+            - np.arctan2(v_target[..., 1], v_target[..., 0]))
+    wrapped = np.arctan2(np.sin(diff), np.cos(diff))
+    return wrapped * (180.0 / math.pi)
+
+
+def wrap_deg(delta):
+    """Wrap an angle difference into ``(-180, 180]`` degrees.
+
+    A correction-angle *change* under a large landmark perturbation can wrap past the
+    +-180 deg branch cut, at which point a raw ``a1 - a0`` overstates the true change by
+    ~360 deg. Wrapping gives the principal change, which is what "how much did the angle
+    move" means. For the small displacements of in-domain operation this is a no-op.
+    """
+    return (np.asarray(delta) + 180.0) % 360.0 - 180.0
 
 
 def angle_and_jacobian(points, fujisawa_pct=FUJISAWA_PCT, dtype=DEFAULT_DTYPE):

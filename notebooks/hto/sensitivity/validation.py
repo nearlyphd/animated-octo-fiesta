@@ -35,9 +35,15 @@ from pathlib import Path
 import numpy as np
 
 from ..geometry import evaluate_side_geometry
-from .jacobian import SIDE_KEYS, angle_and_jacobian, miniaci_angle_signed, points_to_tensor
+from .jacobian import (
+    SIDE_KEYS,
+    angle_and_jacobian,
+    batched_angle_signed,
+    miniaci_angle_signed,
+    points_to_tensor,
+)
 
-__all__ = ["validate", "check_channel_order", "random_hemisphere"]
+__all__ = ["validate", "check_channel_order", "check_batched", "random_hemisphere"]
 
 # Tolerances. Loose enough for float64 finite differences, tight enough to catch a real
 # error: the delta-method bound is ~7000x smaller than the clinical tolerance.
@@ -81,6 +87,31 @@ def _fd_jacobian_reference(points, h=1e-4):
             fd[i, j] = (evaluate_side_geometry(plus)[0]
                         - evaluate_side_geometry(minus)[0]) / (2 * h)
     return fd
+
+
+def check_batched(n=2000, seed=0, rtol_deg=1e-9):
+    """Assert :func:`batched_angle_signed` matches :func:`miniaci_angle_signed` exactly.
+
+    The batched NumPy angle and the per-sample torch angle are separate transcriptions of
+    the same formula; this gates them against drift. Perturbs random hemispheres well
+    beyond the in-domain range so the check also covers the wrapped-difference regime.
+
+    Returns the observed maximum absolute discrepancy in degrees.
+    """
+    rng = np.random.default_rng(seed)
+    base = [random_hemisphere(rng) for _ in range(n)]
+    P = np.stack([np.stack([b[k] for k in SIDE_KEYS]) for b in base])   # (n, 6, 2)
+    P += rng.normal(0, 60, size=P.shape)                               # large perturbations
+
+    batched = batched_angle_signed(P)
+    per_sample = np.array([
+        float(miniaci_angle_signed({k: P[i, j] for j, k in enumerate(SIDE_KEYS)}))
+        for i in range(n)
+    ])
+    max_abs = float(np.abs(batched - per_sample).max())
+    assert max_abs < rtol_deg, \
+        f"batched vs per-sample angle mismatch: {max_abs:.3e} deg"
+    return max_abs
 
 
 def check_channel_order(notebook_path=None):
@@ -184,6 +215,7 @@ def validate(points=None, n_synthetic=500, fd_sample=50, seed=1234, verbose=True
         f"malleoli rows differ by {max_symmetry:.3e} rel -- SIDE_KEYS may be mis-ordered"
 
     order_checked = check_channel_order()
+    max_batched = check_batched()
     alphas = np.array(alphas)
     n_fd = min(fd_sample, len(points))
 
@@ -199,12 +231,14 @@ def validate(points=None, n_synthetic=500, fd_sample=50, seed=1234, verbose=True
               f"{max_symmetry:.2e} rel   OK")
         print(f"  [5] SIDE_KEYS vs GLOBAL_KEYPOINT_NAMES     "
               f"{'OK' if order_checked else 'skipped (notebook not found)'}")
+        print(f"  [6] batched vs per-sample angle           {max_batched:.2e} deg   OK")
 
     return {
         "max_parity": float(max_parity),
         "max_grad": float(max_grad),
         "max_linear": float(max_linear),
         "max_symmetry": float(max_symmetry),
+        "max_batched": float(max_batched),
         "n_checked": len(points),
         "n_finite_difference": n_fd,
         "channel_order_checked": bool(order_checked),

@@ -27,13 +27,15 @@ from .jacobian import (
     SIDE_KEYS,
     TOLERANCE_DEG,
     angle_and_jacobian,
+    batched_angle_signed,
     cohort_jacobians,
     delta_method,
     miniaci_angle_signed,
     points_to_tensor,
     precision_budget,
+    wrap_deg,
 )
-from .validation import check_channel_order, validate
+from .validation import check_batched, check_channel_order, validate
 
 __all__ = [
     "SIDE_KEYS",
@@ -43,10 +45,13 @@ __all__ = [
     "TOLERANCE_DEG",
     "points_to_tensor",
     "miniaci_angle_signed",
+    "batched_angle_signed",
+    "wrap_deg",
     "angle_and_jacobian",
     "cohort_jacobians",
     "delta_method",
     "precision_budget",
     "validate",
     "check_channel_order",
+    "check_batched",
 ]
