@@ -1,0 +1,48 @@
+{
+  "experiment": "Paper A / E4 - sensitivity-weighted loss",
+  "dev_mode": false,
+  "arms": [
+    "equal",
+    "weighted"
+  ],
+  "n_splits": 5,
+  "epochs": 750,
+  "weight_mode": "cohort",
+  "weight_power": 1,
+  "use_measurement": false,
+  "measurement_lambda": 0.1,
+  "seed": 42,
+  "tolerance_deg": 1.63,
+  "n_hemispheres_per_arm": {
+    "equal": 107,
+    "weighted": 107
+  },
+  "matched_mre": {
+    "equal": 17.522160857477118,
+    "weighted": 17.840878293822534
+  },
+  "angle_summary": {
+    "equal": {
+      "mean": 0.4118417345046957,
+      "p95": 1.0659697147231721,
+      "max": 1.801209135445231,
+      "within_tol": 0.9906542056074766
+    },
+    "weighted": {
+      "mean": 0.4482374301117939,
+      "p95": 1.0919232936899332,
+      "max": 1.4560293979022338,
+      "within_tol": 1.0
+    }
+  },
+  "median_J_norm": {
+    "femur_head": 0.019432377278749576,
+    "knee_inner": 0.016158439324443608,
+    "ost_point": 0.002539246366594032,
+    "knee_outer": 0.026930732207406015,
+    "ankle_inner": 0.011423685755330641,
+    "ankle_outer": 0.011423685755330641
+  },
+  "mechanism_corr_J_vs_delta": -0.4166117134061955,
+  "mechanism_agreement": "4/6"
+}
