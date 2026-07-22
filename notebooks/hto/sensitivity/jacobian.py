@@ -88,7 +88,7 @@ DEFAULT_DTYPE = torch.float64
 __all__ = [
     "SIDE_KEYS", "HEMISPHERE_BASES", "LANDMARK_LABELS", "FUJISAWA_PCT", "TOLERANCE_DEG",
     "points_to_tensor", "miniaci_angle_signed", "batched_angle_signed", "wrap_deg",
-    "angle_and_jacobian", "cohort_jacobians", "delta_method", "precision_budget",
+    "soft_argmax", "angle_and_jacobian", "cohort_jacobians", "delta_method", "precision_budget",
 ]
 
 
@@ -193,6 +193,42 @@ def wrap_deg(delta):
     move" means. For the small displacements of in-domain operation this is a no-op.
     """
     return (np.asarray(delta) + 180.0) % 360.0 - 180.0
+
+
+def soft_argmax(heatmaps, eps=1e-6):
+    """Differentiable sub-pixel coordinate decode (DSNT-style centroid).
+
+    Hard ``argmax`` returns the single hottest cell and cannot express a sub-pixel location,
+    so it imposes a quantisation floor of ~half a heatmap cell. This returns the *centroid*
+    of the predicted heatmap mass, which is sub-pixel and differentiable -- the decode the
+    measurement term (Paper A / E4) needs.
+
+    **It normalises a non-negative heatmap by its sum; it does NOT apply a softmax.** A
+    softmax over a [0, 1] heatmap silently fails: the single peak (weight ``e^1``) is
+    outvoted by the tens of thousands of background cells (each ``e^0``), so the centroid
+    collapses to the image centre regardless of where the landmark is. Normalising
+    ``relu(heatmap)`` by its sum gives the blob its true mass, so the centroid tracks the
+    peak. (This is the bug that made an early E4 measurement run diverge.)
+
+    Parameters
+    ----------
+    heatmaps : torch.Tensor
+        ``(B, K, h, w)`` raw heatmaps.
+
+    Returns
+    -------
+    torch.Tensor
+        ``(B, K, 2)`` coordinates ``[x, y]`` in heatmap-grid units.
+    """
+    hm = torch.relu(heatmaps)
+    denom = hm.sum(dim=(-2, -1), keepdim=True).clamp_min(eps)
+    prob = hm / denom
+    h, w = heatmaps.shape[-2], heatmaps.shape[-1]
+    xs = torch.arange(w, device=heatmaps.device, dtype=prob.dtype)
+    ys = torch.arange(h, device=heatmaps.device, dtype=prob.dtype)
+    ex = (prob.sum(-2) * xs).sum(-1)
+    ey = (prob.sum(-1) * ys).sum(-1)
+    return torch.stack([ex, ey], dim=-1)
 
 
 def angle_and_jacobian(points, fujisawa_pct=FUJISAWA_PCT, dtype=DEFAULT_DTYPE):

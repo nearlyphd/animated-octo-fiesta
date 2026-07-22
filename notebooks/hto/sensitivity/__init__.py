@@ -33,6 +33,7 @@ from .jacobian import (
     miniaci_angle_signed,
     points_to_tensor,
     precision_budget,
+    soft_argmax,
     wrap_deg,
 )
 from .validation import check_batched, check_channel_order, validate
@@ -47,6 +48,7 @@ __all__ = [
     "miniaci_angle_signed",
     "batched_angle_signed",
     "wrap_deg",
+    "soft_argmax",
     "angle_and_jacobian",
     "cohort_jacobians",
     "delta_method",
